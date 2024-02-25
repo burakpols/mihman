@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import fs from "fs";
 import {
   Table,
   Button,
@@ -8,7 +9,7 @@ import {
   ButtonGroup,
 } from "react-bootstrap";
 import menu from "../menu/data";
-import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 const ProductTable = () => {
   const [showEditModal, setShowEditModal] = useState(false);
@@ -25,33 +26,89 @@ const ProductTable = () => {
   const [deleteItemId, setDeleteItemId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const writeDataToFile = () => {
+    try {
+      fs.writeFileSync(
+        dataFilePath,
+        `module.exports = ${JSON.stringify(data, null, 4)};`
+      );
+      console.log("Data has been updated successfully.");
+    } catch (error) {
+      console.error("Error writing data to file:", error);
+    }
+  };
+
+  const updateItemById = async (id, newData) => {
+    try {
+      // Read the data from the file
+      let data = require("../menu/data.js");
+      const modulePath = require.resolve("../menu/data.js");
+      // Find the item with the provided ID
+      let updatedData = data.map((item) => {
+        if (item.id === id) {
+          return { ...item, ...newData }; // Merge the existing item with the new data
+        }
+        return item;
+      });
+      // Write the updated data back to the file
+      writeDataToFile(updatedData);
+      delete require.cache[modulePath];
+      return 200;
+    } catch {
+      return 500;
+    }
+  };
+
+  const addItem = async (newData) => {
+    try {
+      // Read the data from the file
+      let data = require("../menu/data.js");
+      const modulePath = require.resolve("../menu/data.js");
+      // Find the item with the provided ID
+      newData.id = uuidv4();
+      data.push(newData);
+      // Write the updated data back to the file
+      writeDataToFile(data);
+      delete require.cache[modulePath];
+      return 200;
+    } catch {
+      return 500;
+    }
+  };
+
+  const deleteItem = async (id) => {
+    try {
+      let data = require("../menu/data.js");
+      const modulePath = require.resolve("../menu/data.js");
+      let updatedData = data.filter((item) => item.id !== id);
+      writeDataToFile(updatedData);
+      delete require.cache[modulePath];
+      return 200;
+    } catch {
+      return 500;
+    }
+  };
+
   const handleEdit = (product) => {
     setEditedProduct(product);
     setShowEditModal(true);
   };
-  const handleDelete=(id)=>{
-    setDeleteItemId(id)
-    setShowDeleteModal(true)
-  }
+  const handleDelete = (id) => {
+    setDeleteItemId(id);
+    setShowDeleteModal(true);
+  };
   const handleSaveDelete = async () => {
-    console.log(deleteItemId);
     try {
-      const response = await axios.post("http://localhost:3800/api/delete", {
-        deleteItemId,
-      });
+      const response = await deleteItem(deleteItemId);
 
-      if (response.status === 200) {
-        setDeleteItemId("")
-        setShowDeleteModal(false)
-        // Başarılı giriş
-        console.log("done");
-        // navigate('/admin/dashboard'); // navigate fonksiyonunu uygun bir şekilde kullanarak yönlendirme yapabilirsiniz
+      if (response === 200) {
+        setDeleteItemId("");
+        setShowDeleteModal(false);
       } else {
-        // Giriş başarısız, hata işleme
         throw new Error(
           "Authentication failed. Please check your credentials."
         );
-        
       }
     } catch (error) {
       // Hata durumunda
@@ -60,19 +117,12 @@ const ProductTable = () => {
   };
 
   const handleSaveEdit = async () => {
-    // Update the product
-    console.log(editedProduct);
     try {
-      const response = await axios.post("http://localhost:3800/api/update", {
-        editedProduct,
-      });
-
-      if (response.status === 200) {
-        // Başarılı giriş
-        console.log("done");
-        // navigate('/admin/dashboard'); // navigate fonksiyonunu uygun bir şekilde kullanarak yönlendirme yapabilirsiniz
+      const id = editedProduct.id;
+      const response = await updateItemById(id, editedProduct);
+      if (response === 200) {
+        console.log("updated");
       } else {
-        // Giriş başarısız, hata işleme
         throw new Error(
           "Authentication failed. Please check your credentials."
         );
@@ -91,11 +141,9 @@ const ProductTable = () => {
 
   const handleSaveAdd = async () => {
     try {
-      const response = await axios.post("http://localhost:3800/api/add", {
-        newProduct,
-      });
+      const response = await addItem(newProduct);
 
-      if (response.status === 200) {
+      if (response === 200) {
         console.log("added");
       } else {
         throw new Error(
@@ -147,14 +195,18 @@ const ProductTable = () => {
               <td>{product.price}</td>
               <td>
                 <img
-                  src={"../."+product.img}
+                  src={"../." + product.img}
                   alt={product.title}
                   style={{ width: "50px" }}
                 />
               </td>
               <td>
                 <ButtonGroup>
-                  <Button className="m-1" variant="primary" onClick={() => handleEdit(product)}>
+                  <Button
+                    className="m-1"
+                    variant="primary"
+                    onClick={() => handleEdit(product)}
+                  >
                     Güncelle
                   </Button>
                   <Button
@@ -170,7 +222,7 @@ const ProductTable = () => {
           ))}
         </tbody>
       </Table>
-      
+
       {/* Edit Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
@@ -349,24 +401,21 @@ const ProductTable = () => {
         </Modal.Footer>
       </Modal>
 
-
-       {/* delete Modal */}         
+      {/* delete Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-      <Modal.Header closeButton>
-        <Modal.Title>Silme işlemini onayla</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>Gerçekten ürünü silmek istiyor musunuz?</Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-          İptal
-        </Button>
-        <Button variant="danger" onClick={handleSaveDelete}>
-          Sil
-        </Button>
-      </Modal.Footer>
-    </Modal>
-
-      
+        <Modal.Header closeButton>
+          <Modal.Title>Silme işlemini onayla</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Gerçekten ürünü silmek istiyor musunuz?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            İptal
+          </Button>
+          <Button variant="danger" onClick={handleSaveDelete}>
+            Sil
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

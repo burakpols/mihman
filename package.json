@@ -1,6 +1,6 @@
 {
-  "name": "bnmijblav.github",
-  "version": "0.0.0",
+  "name": "mihman",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "4.2.4",
@@ -8,7 +8,6 @@
     "@testing-library/user-event": "7.2.1",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
-    "axios": "^1.6.7",
     "bootstrap": "^5.3.3",
     "primereact": "^10.5.1",
     "react": "^18.2.0",
@@ -26,8 +25,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "server": "live-server public --host=0.0.0.0 --port=3000"
+    "eject": "react-scripts eject"
   },
   "devDependencies": {
     "react-scripts": "latest"

@@ -2,9 +2,16 @@ import React, { useState } from "react";
 import "./AdminStyle.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const AdminPage = () => {
+  const users = [
+    {
+      id: 1,
+      username: "mihman",
+      password: "Mihman123!",
+      role: "admin",
+    },
+  ];
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,18 +28,16 @@ const AdminPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3800/api/login", {
-          username: username,
-          password: password
-      });
 
-      if (response.status === 200) {
-          // Başarılı giriş
-          console.log("done");
-          navigate('/admin/dashboard/zAwbAcPVXTIGwdSIIHXXYKehz3OANhWZ'); 
-      } else {
-          // Giriş başarısız, hata işleme
-          throw new Error("Authentication failed. Please check your credentials.");
+      const user = users.find((u) => {
+        return u.username === username && u.password === password;
+      });
+    
+      if (user) {
+        navigate('/admin/dashboard/zAwbAcPVXTIGwdSIIHXXYKehz3OANhWZ');
+      }else{
+        throw new Error("Authentication failed. Please check your credentials.");
+
       }
   } catch (error) {
       // Hata durumunda
