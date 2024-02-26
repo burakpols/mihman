@@ -8,11 +8,12 @@ const Qr = () => {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
-
+  const main_url= "https://mihman-be.vercel.app"
+  // const main_url= "http://localhost:3800"
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get('http://localhost:3800/items');
+        const response = await axios.get(`${main_url}/items`);
         setItems(response.data);
       } catch (error) {
         console.error('Error fetching items:', error);

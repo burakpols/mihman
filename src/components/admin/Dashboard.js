@@ -26,7 +26,8 @@ const ProductTable = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const main_url = "http://localhost:3800";
+  // const main_url = "http://localhost:3800";
+  const main_url= "https://mihman-be.vercel.app"
   const fetchItems = async () => {
     try {
       const response = await axios.get(`${main_url}/items`);
