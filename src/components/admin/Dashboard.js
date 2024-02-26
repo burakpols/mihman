@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import fs from "fs";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Button,
@@ -8,10 +7,10 @@ import {
   Container,
   ButtonGroup,
 } from "react-bootstrap";
-import menu from "../menu/data";
 import { v4 as uuidv4 } from "uuid";
-
+import axios from "axios";
 const ProductTable = () => {
+  const [items, setItems] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedProduct, setEditedProduct] = useState({});
   const [newProduct, setNewProduct] = useState({
@@ -27,34 +26,32 @@ const ProductTable = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const writeDataToFile = () => {
+  const main_url = "http://localhost:3800";
+  const fetchItems = async () => {
     try {
-      fs.writeFileSync(
-        dataFilePath,
-        `module.exports = ${JSON.stringify(data, null, 4)};`
-      );
-      console.log("Data has been updated successfully.");
+      const response = await axios.get(`${main_url}/items`);
+      setItems(response.data);
     } catch (error) {
-      console.error("Error writing data to file:", error);
+      console.error("Error fetching items:", error);
     }
   };
+  useEffect(() => {
+    fetchItems();
+  }, []);
 
   const updateItemById = async (id, newData) => {
     try {
-      // Read the data from the file
-      let data = require("../menu/data.js");
-      const modulePath = require.resolve("../menu/data.js");
-      // Find the item with the provided ID
-      let updatedData = data.map((item) => {
-        if (item.id === id) {
-          return { ...item, ...newData }; // Merge the existing item with the new data
-        }
-        return item;
+      let response = await axios.put(`${main_url}/updateitem/${id}`, newData);
+      // Update the state with the updated item
+      setItems(prevItems => {
+        return prevItems.map(item => {
+          if (item.id === id) {
+            return { ...item, ...newData };
+          }
+          return item;
+        });
       });
-      // Write the updated data back to the file
-      writeDataToFile(updatedData);
-      delete require.cache[modulePath];
-      return 200;
+      return response.status;
     } catch {
       return 500;
     }
@@ -62,16 +59,10 @@ const ProductTable = () => {
 
   const addItem = async (newData) => {
     try {
-      // Read the data from the file
-      let data = require("../menu/data.js");
-      const modulePath = require.resolve("../menu/data.js");
-      // Find the item with the provided ID
       newData.id = uuidv4();
-      data.push(newData);
-      // Write the updated data back to the file
-      writeDataToFile(data);
-      delete require.cache[modulePath];
-      return 200;
+      const response= await axios.post(`${main_url}/additem`,newData);
+      setItems(prevItems => [...prevItems, newData]);
+      return response.status;
     } catch {
       return 500;
     }
@@ -79,12 +70,9 @@ const ProductTable = () => {
 
   const deleteItem = async (id) => {
     try {
-      let data = require("../menu/data.js");
-      const modulePath = require.resolve("../menu/data.js");
-      let updatedData = data.filter((item) => item.id !== id);
-      writeDataToFile(updatedData);
-      delete require.cache[modulePath];
-      return 200;
+      const response= await axios.delete(`${main_url}/deleteitem/${id}`)
+      setItems(prevItems => prevItems.filter(item => item.id !== id));
+      return response.status;
     } catch {
       return 500;
     }
@@ -185,7 +173,7 @@ const ProductTable = () => {
           </tr>
         </thead>
         <tbody>
-          {menu.map((product) => (
+          {items.map((product) => (
             <tr key={product.id}>
               <td>{product.id}</td>
               <td>{product.category}</td>

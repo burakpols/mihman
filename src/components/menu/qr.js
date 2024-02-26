@@ -1,23 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Menu from "./Menu";
 import Categories from "./Categories";
-import items from "./data";
 import "./qr.css"; // Import the CSS file
-
-const allCategories = ["Hepsi", ...new Set(items.map((item) => item.category))];
+import axios from 'axios';
 
 const Qr = () => {
-  const [menuItems, setMenuItems] = useState(items);
-  const [categories, setCategories] = useState(allCategories);
+  const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get('http://localhost:3800/items');
+        setItems(response.data);
+      } catch (error) {
+        console.error('Error fetching items:', error);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
+  useEffect(() => {
+    const allCategories = ["Hepsi", ...new Set(items.map((item) => item.category))];
+    setCategories(allCategories);
+    setMenuItems(items);
+  }, [items]);
 
   const filterItems = (category) => {
-    console.log("click", category);
     if (category === "Hepsi") {
       setMenuItems(items);
-      return;
+    } else {
+      const newItems = items.filter((item) => item.category === category);
+      setMenuItems(newItems);
     }
-    const newItems = items.filter((item) => item.category === category);
-    setMenuItems(newItems);
   };
 
   return (
