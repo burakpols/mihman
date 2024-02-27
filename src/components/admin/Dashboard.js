@@ -42,7 +42,7 @@ const ProductTable = () => {
 
   const updateItemById = async (id, newData) => {
     try {
-      let response = await axios.put(`${main_url}/updateitem/${id}`, newData);
+      let response = await axios.post(`${main_url}/updateitem`, newData);
       console.log(response.data);
       // Update the state with the updated item
       setItems(prevItems => {
