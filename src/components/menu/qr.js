@@ -6,14 +6,14 @@ import axios from 'axios';
 
 const Qr = () => {
   const [items, setItems] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
-  const main_url= "https://mihman-be.vercel.app"
-  // const main_url= "http://localhost:3800"
+  const [categories, setCategories] = useState(["Hepsi"]);
+  const mainUrl = "https://mihman-be.vercel.app"; // Define main URL
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get(`${main_url}/items`);
+        const response = await axios.get(`${mainUrl}/items`);
         setItems(response.data);
       } catch (error) {
         console.error('Error fetching items:', error);
@@ -30,12 +30,8 @@ const Qr = () => {
   }, [items]);
 
   const filterItems = (category) => {
-    if (category === "Hepsi") {
-      setMenuItems(items);
-    } else {
-      const newItems = items.filter((item) => item.category === category);
-      setMenuItems(newItems);
-    }
+    const newItems = (category === "Hepsi") ? items : items.filter((item) => item.category === category);
+    setMenuItems(newItems);
   };
 
   return (
