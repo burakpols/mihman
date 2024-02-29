@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from "react";
 
 const Categories = ({ categories, filterItems }) => {
-  let [currentCategory, setCurrentCategory] = useState(0);
+  const [currentCategory, setCurrentCategory] = useState(0);
+  const containerRef = useRef(null);
 
   const handleCategoryClick = (categoryIndex, category) => {
     filterItems(category);
@@ -9,21 +10,21 @@ const Categories = ({ categories, filterItems }) => {
   };
 
   return (
-    <div className="btn-container">
-      {categories.map((category, index) => {
-        return (
-          <button
-            type="button"
-            className={`filter-btn ${
-              index === currentCategory ? 'active' : ''
-            }`}
-            key={index}
-            onClick={() => handleCategoryClick(index, category)}
-          >
-            {category}
-          </button>
-        );
-      })}
+    <div
+      className="btn-container"
+      ref={containerRef}
+      style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+    >
+      {categories.map((category, index) => (
+        <button
+          type="button"
+          className={`filter-btn ${index === currentCategory ? "active" : ""}`}
+          key={index}
+          onClick={() => handleCategoryClick(index, category)}
+        >
+          {category}
+        </button>
+      ))}
     </div>
   );
 };
