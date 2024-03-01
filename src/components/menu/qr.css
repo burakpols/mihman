@@ -185,6 +185,13 @@ Menu
   margin: 0 auto;
   max-width: 1170px;
 }
+.menu-items {
+  transition: opacity 0.3s ease;
+}
+
+.menu-items.transitioning {
+  opacity: 0;
+}
 .menu-item {
   display: grid;
   gap: 1rem 2rem;
@@ -220,6 +227,46 @@ Menu
   margin-bottom: 0;
   padding-top: 1rem;
 }
+
+.loader {
+  width: 150px; /* Increase the width to make it bigger */
+  height: 150px; /* Set height to match width for maintaining aspect ratio */
+  margin: 0 auto; /* Center the loader horizontally */
+  display: grid;
+}
+
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  width: 70px; /* Increase the width of loader elements */
+  height: 70px; /* Set height to match width for maintaining aspect ratio */
+  box-shadow: 0 0 0 6px #c59d5f inset; /* Adjust shadow */
+  filter: drop-shadow(80px 80px 0 #c59d5f); /* Adjust drop shadow */
+  animation: l8 2s infinite alternate;
+}
+
+.loader:after {
+  margin: 0 0 0 auto;
+  filter: drop-shadow(-80px 80px 0 #c59d5f);
+  animation-delay: -1s;
+}
+
+@keyframes l8 {
+  0%, 10% {
+    border-radius: 0;
+  }
+  30%, 40% {
+    border-radius: 50% 0;
+  }
+  60%, 70% {
+    border-radius: 50%;
+  }
+  90%, 100% {
+    border-radius: 0 50%;
+  }
+}
+
 
 /* Responsive adjustments */
 @media screen and (min-width: 768px) {
